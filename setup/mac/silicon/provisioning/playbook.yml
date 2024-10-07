@@ -1,0 +1,235 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars:
+    docker_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+    docker_gpg_key_url: https://download.docker.com/linux/ubuntu/gpg
+    docker_repo: "deb [arch={{ docker_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    faasd_install_script_url: https://raw.githubusercontent.com/openfaas/faasd/master/hack/install.sh
+    faasd_install_script_dest: /tmp/install_faasd.sh
+    faasd_install_script_checksum: "c3f40fec611cd7ffb06f300856a1dd0d2d83cec7b5ecc0aa3281568de806e0bf"  # Replace with actual checksum
+    openfaas_cli_url: https://cli.openfaas.com
+    openfaas_cli_install_script: /tmp/install_faas_cli.sh
+    openfaas_cli_binary: /usr/local/bin/faas-cli
+    openfaas_cli_checksum: "bd0533cd933a0ace9937961ce4512627d9c5e3e47f68f2a7059243208c778a67"  # Replace with actual checksum if available
+    faasd_password_file: /var/lib/faasd/secrets/basic-auth-password
+
+
+  tasks:
+
+    # --- 1. System Upgrade Tasks ---
+
+    - name: Perform a full upgrade within the current release-
+      ansible.builtin.apt:
+        upgrade: full
+        update_cache: yes
+
+    - name: Remove dependencies that are no longer required.
+      ansible.builtin.apt:
+        autoremove: yes
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Clean the apt cache
+      ansible.builtin.apt:
+        autoclean: yes
+
+    - name: Remove all packages from the apt cache
+      ansible.builtin.apt:
+        clean: yes
+
+    # --- 2. Docker Installation Tasks ---
+
+    - name: Remove conflicting Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-doc
+          - docker-compose
+          - docker-compose-v2
+          - podman-docker
+          - containerd
+          - runc
+        state: absent
+        purge: yes
+        autoremove: yes
+      ignore_errors: yes  # Allows playbook to continue if packages are not installed
+
+    - name: Install prerequisites for Docker
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Add Docker's official GPG key
+      ansible.builtin.apt_key:
+        url: "{{ docker_gpg_key_url }}"
+        state: present
+
+    - name: Create directory for Docker's GPG key
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker's official GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Ensure Docker's GPG key is readable
+      ansible.builtin.file:
+        path: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Add Docker repository to Apt sources
+      ansible.builtin.apt_repository:
+        repo: "{{ docker_repo }}"
+        filename: docker
+        state: present
+
+    - name: Update apt package index
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Docker Engine and related packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+        update_cache: yes
+
+    - name: Ensure Docker service is enabled and started
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add current user to the docker group
+      ansible.builtin.user:
+        name: "vagrant"
+        groups: docker
+        append: yes
+
+    # --- 3. faasd Installation Tasks ---
+
+
+    - name: Download faasd install script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/openfaas/faasd/master/hack/install.sh
+        dest: /tmp/install_faasd.sh
+        mode: '0755'
+
+    - name: Execute faasd install script
+      ansible.builtin.script: /tmp/install_faasd.sh
+      args:
+        creates: /usr/local/bin/faasd  # Adjust accordingly
+      register: faasd_install
+
+    - name: Remove faasd install script
+      ansible.builtin.file:
+        path: /tmp/install_faasd.sh
+        state: absent
+
+    # --- 4. Service Status Checks ---
+
+    - name: Ensure containerd service is running
+      ansible.builtin.systemd:
+        name: containerd
+        state: started
+        enabled: true
+
+
+    - name: Ensure faasd-provider service is running
+      ansible.builtin.systemd:
+        name: faasd-provider
+        state: started
+        enabled: true
+
+    - name: Ensure faasd service is running
+      ansible.builtin.systemd:
+        name: faasd
+        state: started
+        enabled: true
+
+    # --- 4. OpenFaaS CLI Installation Tasks ---
+
+    - name: Check if faas-cli is already installed
+      ansible.builtin.stat:
+        path: "{{ openfaas_cli_binary }}"
+      register: faas_cli_stat
+
+    - name: Download OpenFaaS CLI install script
+      ansible.builtin.get_url:
+        url: "{{ openfaas_cli_url }}"
+        dest: "{{ openfaas_cli_install_script }}"
+        mode: '0755'
+        checksum: "{{ openfaas_cli_checksum }}"
+      when: faas_cli_stat.stat.exists == false and openfaas_cli_checksum != ""
+
+    - name: Execute OpenFaaS CLI install script
+      ansible.builtin.command: /bin/bash "{{ openfaas_cli_install_script }}"
+      args:
+        creates: "{{ openfaas_cli_binary }}"
+      register: faas_cli_install
+      when: faas_cli_stat.stat.exists == false and openfaas_cli_checksum != ""
+      ignore_errors: yes  # Optional: Continue playbook even if installation fails
+
+    - name: Remove OpenFaaS CLI install script
+      ansible.builtin.file:
+        path: "{{ openfaas_cli_install_script }}"
+        state: absent
+      when: openfaas_cli_install_script is defined and faas_cli_stat.stat.exists == false
+
+    - name: Ensure faas-cli is executable
+      ansible.builtin.file:
+        path: "{{ openfaas_cli_binary }}"
+        mode: '0755'
+        owner: root
+        group: root
+      when: faas_cli_stat.stat.exists == false
+
+     # --- 7. faas-cli Login Task ---
+
+    - name: Read faasd basic-auth-password
+      ansible.builtin.slurp:
+        src: "{{ faasd_password_file }}"
+      register: faasd_password_content
+      tags:
+        - faas_cli
+        - login
+
+    - name: Login to faas-cli using basic-auth-password
+      ansible.builtin.shell: |
+        echo "{{ faasd_password_content.content  | b64decode }}" | "{{ openfaas_cli_binary }}" login --password-stdin
+      args:
+        executable: /bin/bash
+      when: faasd_password_content is defined
+      become: yes
+      become_user: vagrant
+      register: faas_cli_login
+      tags:
+        - faas_cli
+        - login
+
+    - name: Verify faas-cli login
+      ansible.builtin.debug:
+        msg: "faas-cli login was successful."
+      when: faas_cli_login.rc == 0
+      tags:
+        - faas_cli
+        - login

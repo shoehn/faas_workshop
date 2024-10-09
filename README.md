@@ -1,7 +1,12 @@
 ---
 date: "Wednesday, October 9th 2024, 3:14:13 pm"
-modified: "Wednesday, October 9th 2024, 3:17:17 pm"
+modified: "Wednesday, October 9th 2024, 3:34:21 pm"
 ---
+
+<figure>
+<img src="media/80f5855ea8c622b202e86e88c11f2ce606418649.png"
+title="wikilink" alt="workshop_banner.png" />
+</figure>
 
 ## OpenFaaS Workshop
 
@@ -21,9 +26,9 @@ We provide step-by-step setup instructions for both Silicon-based macOS and Wind
 
 Please follow the appropriate guide for your operating system:
 
-1.  [**Setup for Silicon Mac**](Install%20Vagrant%20on%20Windows.md)
+1.  [**Setup for Silicon Mac**](src/branch/master/Install%20Vagrant%20on%20Windows.md)
     - Instructions for setting up Vagrant on an Apple Silicon (M1, M2) Mac.
-2.  [**Setup for Windows**](Install%20Vagrant%20on%20Windows.md)
+2.  [**Setup for Windows**](src/branch/master/Install%20Vagrant%20on%20Windows.md)
     - Instructions for setting up Vagrant on a Windows system.
 
 Each guide will walk you through installing the necessary dependencies, setting up the virtualization backend, and preparing the environment for the workshop.

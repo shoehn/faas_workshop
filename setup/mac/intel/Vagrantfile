@@ -1,0 +1,47 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # For silicone macbook use this image
+  # config.vm.box = "perk/ubuntu-2204-arm64"
+
+  # For Intel based computers use this image
+  config.vm.box = "ubuntu/jammy64"
+
+  # Disable automatic box update checking.
+  config.vm.box_check_update = false
+
+  # This is needed so that OpenFaaS is accessible from the host machine
+  # The host ip of 127.0.0.1 restricts access to your machine only. Remove, 
+  # if you nedd access from a remote machine (i.e. you want work from the cloud).
+  # Remote work is not recommended for security reasons and without support ;-)
+  config.vm.network "forwarded_port", guest: 8080, host: 8080, host_ip: "127.0.0.1"
+  # Forward port 22 on the guest to port 2222 on the host
+  config.vm.network "forwarded_port", guest: 22, host: 50022
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  config.vm.network "public_network"
+
+  config.vm.synced_folder ".", "/vagrant"
+
+  # Disable the default share of the current code directory. Doing this
+  # provides improved isolation between the vagrant box and your host
+  # by making sure your Vagrantfile isn't accessible to the vagrant box.
+  # If you use this you may want to enable additional shared subfolders as
+  # shown above.
+  # config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"
+    # vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
+  end
+
+  # Provision with ansible playbook
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = "provisioning/playbook.yml"
+  end
+end

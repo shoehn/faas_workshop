@@ -21,9 +21,9 @@ We provide step-by-step setup instructions for both Silicon-based macOS and Wind
 
 Please follow the appropriate guide for your operating system:
 
-1.  [**Setup for Silicon Mac**](src/branch/master/Install%20Vagrant%20on%20Windows.md)
+1.  [**Setup for Silicon Mac**](Install%20Vagrant%20on%20Windows.md)
     - Instructions for setting up Vagrant on an Apple Silicon (M1, M2) Mac.
-2.  [**Setup for Windows**](src/branch/master/Install%20Vagrant%20on%20Windows.md)
+2.  [**Setup for Windows**](Install%20Vagrant%20on%20Windows.md)
     - Instructions for setting up Vagrant on a Windows system.
 
 Each guide will walk you through installing the necessary dependencies, setting up the virtualization backend, and preparing the environment for the workshop.

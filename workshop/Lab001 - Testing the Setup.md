@@ -1,6 +1,6 @@
 ---
 date: "Thursday, October 10th 2024, 9:50:08 am"
-modified: "Thursday, October 10th 2024, 10:01:51 am"
+modified: "Thursday, October 10th 2024, 10:18:45 am"
 ---
 
 ## Login to the virtual machine
@@ -33,7 +33,8 @@ Then you might need to re-issue the login command, that we already issued during
 sudo cat /var/lib/faasd/secrets/basic-auth-password | /usr/local/bin/faas-cli login --password-stdin
 ```
 
-> \[!info\]
+> :notebook: INFO
+>
 > The error arises from a so-called race condition: the server has not yet fully started, when the installation script calls the login. Since the server is not ready, it refuses the connection and the call fails.
 > That might be fixed, but since it is a minor issue, we just need to re-issue the command manually here.
 

@@ -5,72 +5,79 @@ modified: "Thursday, October 10th 2024, 10:55:49 am"
 
 ## Login to the virtual machine
 
-First we want to check, if the machine is running. Vagrant has pre-configured the login using a secure freshly generated ssh key for us. It wraps the command in a a convenient way.
+Let’s start by checking if your virtual machine is running. Vagrant makes it easy for you to log in securely using a pre-configured SSH key. Simply run the following command in your terminal:
 
 ``` sh
-vagrant@ubuntu:~$ vagrant ssh
+vagrant ssh
 ```
 
-This brings you immediately to the shell in the virtual machine. There might be a message saying
+This command will bring you to the command line of the virtual machine. If you see a message like this:
 
 > \*\*\* System restart required \*\*\*
 
-Ignore that for now. You can at a later opportunity reboot the machine with a simple:
+You can ignore it for now. If needed, you can restart the machine later with the command:
 
 ``` shell
-vagrant@ubuntu:~$ sudo reboot
+sudo reboot
 ```
 
-It takes some time, that we will save for now.
+Restarting takes some time, so we’ll skip it for now.
 
 > :notebook: INFO
 >
-> I did not implement the reboot in the provisioning script of the machine to
-> save time. I did implement the update of all the packages in the image of the
-> virtual machine, since these are quite old for some systems. But that does not
-> matter, because they are up to date Ubuntu Linux Systems after the update of
-> all packages (and a reboot).
+> The virtual machine has been updated with the latest 
+> packages to save time, but a restart wasn’t included in the
+> setup. The system is up to date, and you can reboot later if 
+> necessary.
 
-In case you got the message, that the login to the faasd service failed during the installation of the machine. It said something like:
+### Fixing Login Issues with faasd
+
+If you saw an error message during setup that looked like this:
 
 > dial tcp 127.0.0.1:8080: connect: connection refused
 
-Then you might need to re-issue the login command, that we already issued during the setup:
+It means the faasd service wasn’t fully ready when the login attempt happened. To fix this, just run the following command inside the virtual machine:
 
-``` shell
-vagrant@ubuntu:~$ sudo cat /var/lib/faasd/secrets/basic-auth-password | /usr/local/bin/faas-cli login --password-stdin
+``` sh
+sudo cat /var/lib/faasd/secrets/basic-auth-password | /usr/local/bin/faas-cli login --password-stdin
 ```
 
 > :notebook: INFO
 >
-> The error arises from a so-called race condition: the server has not yet fully started, when the installation script calls the login. Since the server is not ready, it refuses the connection and the call fails.
-> That might be fixed, but since it is a minor issue, we just need to re-issue the command manually here.
+> This issue is caused by a “race condition,” which means the 
+> server wasn’t fully started when the script tried to log in. 
+> It’s a minor problem, and running the command above will fix 
+> it.
 
-## Check the GUI of the webapp
+## Access the Web Interface
 
-Navigate to port 8080 on your local machine: <http://127.0.0.1:8080>
+Open your web browser and go to: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 ![](../media/Screenshot%202024-10-10%20at%2010.34.25.png)
 
-You will need to login to the application. The password was automatically generated during the setup of the toolchain. It can be retrieved from the command line in the virtual machine:
+You will need to log in. The password was automatically generated during the setup. To get the password, run this command inside the virtual machine:
 
 ``` bash
-vagrant@ubuntu:~$ sudo cat /var/lib/faasd/secrets/basic-auth-password
+sudo cat /var/lib/faasd/secrets/basic-auth-password
 ```
 
-This will give you a very long and ugly string back, but don't care, just copy that one to the password field of the login dialog.
+The command will display a long password. Just copy it and use it to log in to the web interface.
 
-## Check out the Portal
+## Try out the Portal
 
-For testing purposes, try to deploy one of the default functions.
+To test the system, try deploying one of the default functions.
 
 ![](../media/Screenshot%202024-10-10%20at%2010.40.02.png)
 
 > 📔 INFO
 >
-> This will not work on Silicon Macs for all functions, because there are no ARM64 compatible versions of the functions in the default sample directory.
+> If you’re using a Silicon Mac, some default functions may 
+> not work because they aren’t available for ARM64.
 
-Try your function in the UI. You should see it in the left navigation bar and be able to click it.
+
+You should see your deployed function listed on the left side of the portal. Click on it, and then you can use the Invoke button to run the function.
+
+Feel free to explore the interface and try out different functions.
 
 ![](../media/Screenshot%202024-10-10%20at%2010.45.05.png)
 
@@ -78,28 +85,26 @@ Then you can invoke it.
 
 ![](../media/Screenshot%202024-10-10%20at%2010.46.35.png)
 
-Play around with the interface.
 
-You will see the following fields displayed:
+You will see the following information displayed:
 
-- Status - whether the function is ready to run. You will not be able to invoke the function from the UI until the status shows Ready.
-- Replicas - the amount of replicas of your function running in the cluster
-- Image - the Docker image name and version as published to the Docker Hub or Docker repository
-- Invocation count - this shows how many times the function has been invoked and is updated every 5 seconds
+- **Status:** Shows if the function is ready to run. You won’t be able to invoke it until the status says “Ready.”
+- **Replicas:** The number of instances of your function running.
+- **Image:** The name and version of the Docker image being used.
+- **Invocation Count:** How many times the function has been run. This updates every 5 seconds.
 
-Click *Invoke* a number of times and see the *Invocation count* increase.
+Try clicking **Invoke** several times and watch the **Invocation Count** increase.
 
-### Deploy via the Function Store
 
-You can deploy a function from the OpenFaaS store. The store is a free collection of functions curated by the community.
+### Deploy a Function from the OpenFaaS Store
 
-- Click *Deploy New Function*
-- Click *From Store*
-- Click *Figlet* or enter *figlet* into the search bar and then click *Deploy*
+You can also deploy functions from the OpenFaaS store, which is a collection of community-curated functions.
 
-The Figlet function will now appear in your left-hand list of functions. Give this a few moments to be downloaded from the Docker Hub and then type in some text and click Invoke like we did for the Markdown function.
-
-You'll see an ASCII logo generated like this:
+1. Click **Deploy New Function**.
+2. Click **From Store**.
+3. Search for **Figlet** (or type “figlet” in the search bar) and click **Deploy**.
+ 
+The Figlet function will appear on the left. Wait a few moments for it to download, then enter some text and click Invoke to see an ASCII logo generated, like this:
 
 ``` sh
 __        __   _                            _        

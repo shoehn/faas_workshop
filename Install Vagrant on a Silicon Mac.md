@@ -51,6 +51,8 @@ brew install qemu
 vagrant plugin install vagrant-qemu
 ```
 
+More information on the plugin can be found in the repository: [qemu vagrant plugin on github](https://github.com/ppggff/vagrant-qemu).
+
 ### Option 2: Use VMware Fusion (Optional)
 
 You can use **VMware Fusion** as an alternative backend. It is available for free for personal use but is not open source. If you choose this option, follow these steps:

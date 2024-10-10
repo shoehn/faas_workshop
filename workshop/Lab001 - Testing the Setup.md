@@ -1,6 +1,6 @@
 ---
 date: "Thursday, October 10th 2024, 9:50:08 am"
-modified: "Thursday, October 10th 2024, 10:23:38 am"
+modified: "Thursday, October 10th 2024, 10:25:29 am"
 ---
 
 ## Login to the virtual machine
@@ -29,7 +29,7 @@ In case you got the message, that the login to the faasd service failed during t
 
 Then you might need to re-issue the login command, that we already issued during the setup:
 
-``` command
+``` console
 vagrant@ubuntu:~$ sudo cat /var/lib/faasd/secrets/basic-auth-password | /usr/local/bin/faas-cli login --password-stdin
 ```
 

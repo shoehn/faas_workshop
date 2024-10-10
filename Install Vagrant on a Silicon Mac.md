@@ -45,6 +45,12 @@ QEMU is an open-source virtualization backend. To install QEMU, run:
 brew install qemu
 ```
 
+#### 2. Install the Vagrant qemu plugin
+
+```sh
+vagrant plugin install vagrant-qemu
+```
+
 ### Option 2: Use VMware Fusion (Optional)
 
 You can use **VMware Fusion** as an alternative backend. It is available for free for personal use but is not open source. If you choose this option, follow these steps:

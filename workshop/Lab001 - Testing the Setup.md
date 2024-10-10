@@ -1,6 +1,6 @@
 ---
 date: "Thursday, October 10th 2024, 9:50:08 am"
-modified: "Thursday, October 10th 2024, 10:53:19 am"
+modified: "Thursday, October 10th 2024, 10:55:49 am"
 ---
 
 ## Login to the virtual machine
@@ -50,7 +50,7 @@ vagrant@ubuntu:~$ sudo cat /var/lib/faasd/secrets/basic-auth-password | /usr/loc
 
 Navigate to port 8080 on your local machine: <http://127.0.0.1:8080>
 
-![](media/Screenshot%202024-10-10%20at%2010.34.25.png)
+![](../media/Screenshot%202024-10-10%20at%2010.34.25.png)
 
 You will need to login to the application. The password was automatically generated during the setup of the toolchain. It can be retrieved from the command line in the virtual machine:
 
@@ -64,7 +64,7 @@ This will give you a very long and ugly string back, but don't care, just copy t
 
 For testing purposes, try to deploy one of the default functions.
 
-![](media/Screenshot%202024-10-10%20at%2010.40.02.png)
+![](../media/Screenshot%202024-10-10%20at%2010.40.02.png)
 
 > 📔 INFO
 >
@@ -72,11 +72,11 @@ For testing purposes, try to deploy one of the default functions.
 
 Try your function in the UI. You should see it in the left navigation bar and be able to click it.
 
-![](media/Screenshot%202024-10-10%20at%2010.45.05.png)
+![](../media/Screenshot%202024-10-10%20at%2010.45.05.png)
 
 Then you can invoke it.
 
-![](media/Screenshot%202024-10-10%20at%2010.46.35.png)
+![](../media/Screenshot%202024-10-10%20at%2010.46.35.png)
 
 Play around with the interface.
 
